@@ -10,10 +10,15 @@
 #include "inc/ssd1306.h"
 #include "inc/font.h"
 
+// ---------------- Variáveis - Início ----------------
+
 static volatile uint32_t last_time_a = 0;
 static volatile uint32_t last_time_sel = 0;
 static volatile bool flag_led = true;
-static volatile bool flag_display = false;
+static volatile uint8_t count_display = 0;
+static volatile bool borda1 = false, borda2 = false;
+
+// ---------------- Variáveis - Fim ----------------
 
 // ---------------- Defines - Início ----------------
 
@@ -35,8 +40,8 @@ static volatile bool flag_display = false;
 #define ENDERECO 0x3C
 
 #define JSK_SEL 22
-#define JSK_X 26
-#define JSK_Y 27
+#define JSK_Y 26
+#define JSK_X 27
 
 // ---------------- Defines - Fim ----------------
 
@@ -98,12 +103,12 @@ void init_joystick() {
 
 // ---------------- Inicializações  - Fim ----------------
 
-uint16_t read_x() {
+uint16_t read_y() {
     adc_select_input(0);
     return adc_read();
 }
 
-uint16_t read_y() {
+uint16_t read_x() {
     adc_select_input(1);
     return adc_read();
 }
@@ -119,7 +124,18 @@ void gpio_irq_callback(uint gpio, uint32_t events) {
     if( (gpio == JSK_SEL) && (current_time - last_time_sel > 200) ) {
         last_time_sel = current_time;
         gpio_put(GREEN_LED, !gpio_get(GREEN_LED));
-        flag_display = !flag_display;
+        if(count_display == 0) {
+            count_display++;
+            borda1 = true;
+        }else
+        if(count_display == 1) {
+            count_display++;
+            borda2 = true;
+        }else {
+            count_display = 0;
+            borda1 = false;
+            borda2 = false;
+        }
     }
 }
 
@@ -146,41 +162,43 @@ int main() {
 
         if(flag_led) {
             if(x_value >= JSK_AJUST_MAX) {
-                pwm_set_gpio_level(BLUE_LED, ((x_value - 2047) * 2) );
+                pwm_set_gpio_level(RED_LED, ((x_value - 2047) * 2) );
             }else
             if(x_value <= JSK_AJUST_MIN) {
-                pwm_set_gpio_level(BLUE_LED, ((2047 - x_value) * 2) );
-            }else {
-                pwm_set_gpio_level(BLUE_LED, 0);
-            }
-    
-            if(y_value >= JSK_AJUST_MAX) {
-                pwm_set_gpio_level(RED_LED, ((y_value - 2047) * 2) );
-            }else
-            if(y_value <= JSK_AJUST_MIN) {
-                pwm_set_gpio_level(RED_LED, ((2047 - y_value) * 2) );
+                pwm_set_gpio_level(RED_LED, ((2047 - x_value) * 2) );
             }else {
                 pwm_set_gpio_level(RED_LED, 0);
             }
+    
+            if(y_value >= JSK_AJUST_MAX) {
+                pwm_set_gpio_level(BLUE_LED, ((y_value - 2047) * 2) );
+            }else
+            if(y_value <= JSK_AJUST_MIN) {
+                pwm_set_gpio_level(BLUE_LED, ((2047 - y_value) * 2) );
+            }else {
+                pwm_set_gpio_level(BLUE_LED, 0);
+            }
         }else
         {
-            pwm_set_gpio_level(BLUE_LED, 0);
             pwm_set_gpio_level(RED_LED, 0);
+            pwm_set_gpio_level(BLUE_LED, 0);
         }
 
-        ssd1306_rect(&ssd, pos_x, pos_y, 8, 8, false, true);
-        pos_x = 53 - ( ( ( x_value / 4095.0 ) * 50 ));
-        pos_y = ( ( ( y_value / 4095.0 ) * 114 ) + 3 );
-        ssd1306_rect(&ssd, 0, 0, 128, 64, flag_display, false);
+        ssd1306_rect(&ssd, pos_y, pos_x, 8, 8, false, true);
+        pos_y = 53 - ( ( ( y_value / 4095.0 ) * 50 ));
+        pos_x = ( ( ( x_value / 4095.0 ) * 114 ) + 3 );
+
+        ssd1306_rect(&ssd, 0, 0, 128, 64, borda1, false);
+        ssd1306_rect(&ssd, 1, 1, 126, 62, borda2, false);
         ssd1306_rect(&ssd, 2, 2, 124, 60, true, false);
-        ssd1306_rect(&ssd, pos_x, pos_y, 8, 8, true, true);
+        ssd1306_rect(&ssd, pos_y, pos_x, 8, 8, true, true);
         ssd1306_send_data(&ssd);
         
         current_print_time = to_ms_since_boot(get_absolute_time());
         if( (current_print_time - last_print_time) >= 200) {
             last_print_time = current_print_time;
-            printf("X: %u Y: %u ", y_value, x_value);
-            printf("POS X: %u POS Y: %u\n", pos_y, pos_x);
+            printf("X: %u Y: %u ", x_value, y_value);
+            printf("POS X: %u POS Y: %u\n", pos_x, pos_y);
         }
 
     }

@@ -76,8 +76,8 @@
     [ "pico:GP12", "rgb1:B", "blue", [ "v-9.6", "h19.16" ] ],
     [ "pico:GND.3", "rgb1:COM", "black", [ "v0" ] ],
     [ "joystick1:SEL", "pico:GP22", "gray", [ "v19.2", "h134.4", "v172.8", "h-201.6" ] ],
-    [ "pico:GP26", "joystick1:HORZ", "gray", [ "v9.91", "h-124.8", "v-153.6", "h163.2" ] ],
-    [ "pico:GP27", "joystick1:VERT", "gray", [ "v19.51", "h-144", "v-172.8", "h163.2" ] ]
+    [ "pico:GP26", "joystick1:VERT", "gray", [ "v9.91", "h-124.8", "v-153.6", "h153.6" ] ],
+    [ "pico:GP27", "joystick1:HORZ", "gray", [ "v19.51", "h-144", "v-172.8", "h172.8" ] ]
   ],
   "dependencies": {}
 }
