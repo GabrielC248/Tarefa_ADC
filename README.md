@@ -1,6 +1,6 @@
 # Tarefa do EmbarcaTech Sobre ADC para Controle de LEDs e Display com  o Joystick da BitDogLab
   - **Desenvolvedor:** <ins>Gabriel Cavalcanti Coelho</ins>;
-  - **Vídeo:** [YouTube](https://www.youtube.com/).
+  - **Vídeo:** [YouTube](https://youtu.be/U_vIdAi9dh8).
 
 ### Este projeto implementa o ADC na placa BitDogLab para controlar um LED RGB e um display utilizando um joystick. O código contempla a leitura das entradas analógicas do joystick, o controle de brilho de LEDs via PWM, a exibição de um quadrado móvel e de diferentes bordas no display e interrupção no botão A e no botão do joystick.
 
